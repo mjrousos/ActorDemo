@@ -2,5 +2,6 @@
 <StartupServices xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
     <Parameter Name="AccountActorService_PartitionCount" Value="1" />
+    <Parameter Name="TransactorService_PartitionCount" Value="1" />
   </Parameters>
 </StartupServices>

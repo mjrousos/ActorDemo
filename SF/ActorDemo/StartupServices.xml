@@ -4,11 +4,19 @@
     <Parameter Name="AccountActorService_PartitionCount" DefaultValue="10" />
     <Parameter Name="AccountActorService_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="AccountActorService_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="TransactorService_PartitionCount" DefaultValue="10" />
+    <Parameter Name="TransactorService_MinReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="TransactorService_TargetReplicaSetSize" DefaultValue="3" />
   </Parameters>
   <Services>
     <Service Name="AccountActorService" GeneratedIdRef="4731e77e-7340-4008-9bd4-0ec54f278ddf|Persisted">
       <StatefulService ServiceTypeName="AccountActorServiceType" TargetReplicaSetSize="[AccountActorService_TargetReplicaSetSize]" MinReplicaSetSize="[AccountActorService_MinReplicaSetSize]">
         <UniformInt64Partition PartitionCount="[AccountActorService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+      </StatefulService>
+    </Service>
+    <Service Name="TransactorService" GeneratedIdRef="a0650fce-f9c3-4600-be58-4c516fdf8f22|Persisted">
+      <StatefulService ServiceTypeName="TransactorServiceType" TargetReplicaSetSize="[TransactorService_TargetReplicaSetSize]" MinReplicaSetSize="[TransactorService_MinReplicaSetSize]">
+        <UniformInt64Partition PartitionCount="[TransactorService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
       </StatefulService>
     </Service>
     <!-- The section below creates instances of service types, when an instance of this 

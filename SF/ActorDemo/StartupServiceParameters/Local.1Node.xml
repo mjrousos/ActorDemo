@@ -4,5 +4,8 @@
     <Parameter Name="AccountActorService_PartitionCount" Value="1" />
     <Parameter Name="AccountActorService_TargetReplicaSetSize" Value="1" />
     <Parameter Name="AccountActorService_MinReplicaSetSize" Value="1" />
+    <Parameter Name="TransactorService_PartitionCount" Value="1" />
+    <Parameter Name="TransactorService_TargetReplicaSetSize" Value="1" />
+    <Parameter Name="TransactorService_MinReplicaSetSize" Value="1" />
   </Parameters>
 </StartupServices>

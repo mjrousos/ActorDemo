@@ -28,7 +28,7 @@ namespace Account
         /// </summary>
         protected override async Task OnActivateAsync()
         {
-            ActorEventSource.Current.ActorMessage(this, "Account actor {Id} activated.", Id);
+            ActorEventSource.Current.ActorMessage(this, "Account actor {0} activated.", Id.ToString());
 
             var state = await StateManager.TryGetStateAsync<AccountState>(AccountStateName);
             if (!state.HasValue)
@@ -56,7 +56,7 @@ namespace Account
 
         public Task ReceiveReminderAsync(string reminderName, byte[] context, TimeSpan dueTime, TimeSpan period)
         {
-            ActorEventSource.Current.ActorMessage(this, "Processing reminder {ReminderName}", reminderName);
+            ActorEventSource.Current.ActorMessage(this, "Processing reminder {0}", reminderName);
 
             return reminderName switch
             {
