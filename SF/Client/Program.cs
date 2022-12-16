@@ -35,3 +35,11 @@ Console.WriteLine("Checking balances");
 aBalance = await transactor.GetAccountBalanceAsync(accountAId, CancellationToken.None);
 bBalance = await transactor.GetAccountBalanceAsync(accountBId, CancellationToken.None);
 Console.WriteLine($"Balances - A: {aBalance}, B: {bBalance}");
+
+Console.WriteLine("Deleting account B");
+await transactor.DeleteAccountAsync(accountBId, CancellationToken.None);
+
+Console.WriteLine("Checking balances");
+aBalance = await transactor.GetAccountBalanceAsync(accountAId, CancellationToken.None);
+bBalance = await transactor.GetAccountBalanceAsync(accountBId, CancellationToken.None);
+Console.WriteLine($"Balances - A: {aBalance}, B: {bBalance}");
