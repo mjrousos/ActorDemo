@@ -41,6 +41,11 @@ namespace Account
 
         protected override async Task OnDeactivateAsync()
         {
+            // In the context of this demo, the reminder should stay registered even after activation
+            // since interest should still be periodically accumulated even if the actor is idle for some time
+            // and is deactivated!
+            //
+            // In order to demonstrate reminder unregistration, though, we'll unregister the reminder here.
             try
             {
                 var computerInterestReminder = GetReminder(ComputeInterestReminderName);
