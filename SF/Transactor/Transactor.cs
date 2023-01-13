@@ -47,6 +47,7 @@ namespace Transactor
 
             try
             {
+                await account.ActivateAsync(cancellationToken);
                 await account.DepositAsync(initialBalance, cancellationToken);
                 await account.SetInterestRateAsync(DefaultInterestRate, cancellationToken);
             }
@@ -63,12 +64,12 @@ namespace Transactor
         {
             var id = new ActorId(accountId);
             var account = ActorProxy.Create<IAccount>(id);
+            var exists = await account.IsActive(cancellationToken);
             var accountService = ActorServiceProxy.Create(account.GetActorReference().ServiceUri, id);
 
             await accountService.DeleteActorAsync(id, cancellationToken);
 
-            // TODO - Have a mechanism for checking whether the account exists
-            return true;
+            return exists;
         }
 
         public async Task<double> GetAccountBalanceAsync(string accountId, CancellationToken cancellationToken)
@@ -83,11 +84,6 @@ namespace Transactor
             var fromAccount = ActorProxy.Create<IAccount>(new ActorId(fromAccountId));
             var toAccount = ActorProxy.Create<IAccount>(new ActorId(toAccountId));
 
-            // TODO - Have a way of distringuishing between accounts with zero balance and those that don't exist
-            // (since the actors are automatically created). Should probably have some ID or boolean that is set
-            // on CreateAccountAsync calls to indicate that the account *actually* exists. Otherwise, users could
-            // accidentally transfer money to non-existent accounts. With this check in place, they could still
-            // transfer to the wrong account but not a non-existent one.
             try
             {
                 await fromAccount.WithdrawAsync(amount, cancellationToken);
@@ -106,9 +102,6 @@ namespace Transactor
             }
             catch
             {
-                // This shouldn't actually fail. But for example purposes, if it did (maybe the
-                // toAccount was deleted mid-transfer), we would roll back the withdrawal
-                // from the fromAccount.
                 await fromAccount.DepositAsync(amount, cancellationToken);
 
                 ActorEventSource.Current.ActorMessage(this, "Transfer failed depositing funds; rolling back. From: {0}, To: {1}, Amount: {2}", fromAccountId, toAccountId, amount);
@@ -119,6 +112,12 @@ namespace Transactor
             ActorEventSource.Current.ActorMessage(this, "Transfer successful. From: {0}, To: {1}, Amount: {2}", fromAccountId, toAccountId, amount);
 
             return true;
+        }
+
+        public async Task<bool> CheckAccountExists(string accountId, CancellationToken cancellationToken)
+        {
+            var account = ActorProxy.Create<IAccount>(new ActorId(accountId));
+            return await account.IsActive(cancellationToken);
         }
     }
 }

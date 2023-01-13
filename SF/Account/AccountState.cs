@@ -6,6 +6,9 @@ namespace Account
     internal class AccountState
     {
         [DataMember]
+        public bool Active { get; set; }
+
+        [DataMember]
         public double Balance { get; set; }
 
         [DataMember]

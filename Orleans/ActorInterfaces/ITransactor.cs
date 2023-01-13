@@ -6,6 +6,8 @@
     /// </summary>
     public interface ITransactor : IGrainWithIntegerKey
     {
+        Task<bool> CheckAccountExists(string accountId, GrainCancellationToken cancellationToken);
+
         Task<string> CreateAccountAsync(double initialBalance, GrainCancellationToken cancellationToken);
 
         Task<bool> DeleteAccountAsync(string accountId, GrainCancellationToken cancellationToken);

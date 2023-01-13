@@ -72,13 +72,31 @@ namespace Actors
             // We could work with _state.State directly, but setting it to a local here allows the rest
             // of the method that previously used state from StateManager.GetStateAsync to remain unchanged.
             var state = _state.State;
-            state.Balance *= 1 + state.InterestRate;
+            if (state.Active)
+            {
+                state.Balance *= 1 + state.InterestRate;
+                await _state.WriteStateAsync();
+            }
+        }
+
+        public async Task ActivateAsync(GrainCancellationToken cancellationToken)
+        {
+            var state = _state.State;
+            state.Active = true;
             await _state.WriteStateAsync();
         }
+
+        public Task<bool> IsActive(GrainCancellationToken cancellationToken) => Task.FromResult(_state.State.Active);
 
         public Task<double> GetBalanceAsync(GrainCancellationToken cancellationToken)
         {
             var state = _state.State;
+
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
+
             return Task.FromResult(state.Balance);
         }
 
@@ -90,6 +108,11 @@ namespace Actors
             }
 
             var state = _state.State;
+
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
 
             if (amount > state.Balance)
             {
@@ -112,6 +135,11 @@ namespace Actors
 
             var state = _state.State;
 
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
+
             state.Balance += amount;
 
             await _state.WriteStateAsync();
@@ -122,6 +150,12 @@ namespace Actors
         public Task<double> GetInterestRateAsync(GrainCancellationToken cancellationToken)
         {
             var state = _state.State;
+
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
+
             return Task.FromResult(state.InterestRate);
         }
 
@@ -133,15 +167,25 @@ namespace Actors
             }
 
             var state = _state.State;
+
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
+
             state.InterestRate = rate;
             await _state.WriteStateAsync();
         }
 
-        public async Task DeleteAsync(GrainCancellationToken cancellationToken)
+        public async Task<bool> DeleteAsync(GrainCancellationToken cancellationToken)
         {
+            var exists = _state.State.Active;
+
             // Since there's no way to force persistent state deletion in Orleans, just have a method on the
             // grain to clear state or mark it as soft deleted/unused.
             await _state.ClearStateAsync();
+
+            return exists;
         }
     }
 }

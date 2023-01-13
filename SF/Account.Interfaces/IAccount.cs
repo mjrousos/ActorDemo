@@ -11,6 +11,10 @@ namespace Account.Interfaces
     /// </summary>
     public interface IAccount : IActor
     {
+        Task ActivateAsync(CancellationToken cancellationToken);
+
+        Task<bool> IsActive(CancellationToken cancellationToken);
+
         Task<double> GetBalanceAsync(CancellationToken cancellationToken);
 
         Task<double> WithdrawAsync(double amount, CancellationToken cancellationToken);

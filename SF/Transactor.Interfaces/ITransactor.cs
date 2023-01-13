@@ -11,6 +11,8 @@ namespace Transactor.Interfaces
     /// </summary>
     public interface ITransactor : IActor
     {
+        Task<bool> CheckAccountExists(string accountId, CancellationToken cancellationToken);
+
         Task<string> CreateAccountAsync(double initialBalance, CancellationToken cancellationToken);
 
         Task<bool> DeleteAccountAsync(string accountId, CancellationToken cancellationToken);

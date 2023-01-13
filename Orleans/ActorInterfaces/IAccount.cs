@@ -6,6 +6,10 @@
     /// </summary>
     public interface IAccount : IGrainWithStringKey
     {
+        Task ActivateAsync(GrainCancellationToken cancellationToken);
+
+        Task<bool> IsActive(GrainCancellationToken cancellationToken);
+
         Task<double> GetBalanceAsync(GrainCancellationToken cancellationToken);
 
         Task<double> WithdrawAsync(double amount, GrainCancellationToken cancellationToken);
@@ -16,6 +20,6 @@
 
         Task SetInterestRateAsync(double rate, GrainCancellationToken cancellationToken);
 
-        Task DeleteAsync(GrainCancellationToken cancellationToken);
+        Task<bool> DeleteAsync(GrainCancellationToken cancellationToken);
     }
 }

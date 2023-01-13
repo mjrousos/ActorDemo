@@ -25,31 +25,40 @@ var accountAId = await transactor.CreateAccountAsync(100, cts.Token);
 Console.WriteLine("Creating account B with $100");
 var accountBId = await transactor.CreateAccountAsync(100, cts.Token);
 
+await CheckBalancesAsync(cts.Token);
+
 Console.WriteLine("Transferring $60 from A to B");
 var result = await transactor.TransferAsync(accountAId, accountBId, 60, cts.Token);
 Console.WriteLine($"Transfer succeeded: {result}");
+
+await CheckBalancesAsync(cts.Token);
 
 Console.WriteLine("Transferring $60 from A to B");
 result = await transactor.TransferAsync(accountAId, accountBId, 60, cts.Token);
 Console.WriteLine($"Transfer succeeded: {result}");
 
-Console.WriteLine("Checking balances");
-var aBalance = await transactor.GetAccountBalanceAsync(accountAId, cts.Token);
-var bBalance = await transactor.GetAccountBalanceAsync(accountBId, cts.Token);
-Console.WriteLine($"Balances - A: {aBalance}, B: {bBalance}");
+await CheckBalancesAsync(cts.Token);
+
+Console.WriteLine("Transferring $10 from A to non-existent account");
+result = await transactor.TransferAsync(accountAId, "DoesNotExist", 10, cts.Token);
+Console.WriteLine($"Transfer succeeded: {result}");
+
+await CheckBalancesAsync(cts.Token);
 
 Console.WriteLine("Waiting 130 seconds to test interest accumulation");
 await Task.Delay(130 * 1000);
 
-Console.WriteLine("Checking balances");
-aBalance = await transactor.GetAccountBalanceAsync(accountAId, cts.Token);
-bBalance = await transactor.GetAccountBalanceAsync(accountBId, cts.Token);
-Console.WriteLine($"Balances - A: {aBalance}, B: {bBalance}");
+await CheckBalancesAsync(cts.Token);
 
 Console.WriteLine("Deleting account B");
 await transactor.DeleteAccountAsync(accountBId, cts.Token);
 
-Console.WriteLine("Checking balances");
-aBalance = await transactor.GetAccountBalanceAsync(accountAId, cts.Token);
-bBalance = await transactor.GetAccountBalanceAsync(accountBId, cts.Token);
-Console.WriteLine($"Balances - A: {aBalance}, B: {bBalance}");
+await CheckBalancesAsync(cts.Token);
+
+async Task CheckBalancesAsync(GrainCancellationToken cancellationToken)
+{
+    Console.WriteLine("Checking balances");
+    var aBalance = await transactor.GetAccountBalanceAsync(accountAId, cancellationToken);
+    var bBalance = await transactor.GetAccountBalanceAsync(accountBId, cancellationToken);
+    Console.WriteLine($"Balances - A: {aBalance}, B: {bBalance}");
+}

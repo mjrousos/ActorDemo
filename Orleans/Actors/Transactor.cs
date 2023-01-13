@@ -43,6 +43,7 @@ namespace Actors
 
             try
             {
+                await account.ActivateAsync(cancellationToken);
                 await account.DepositAsync(initialBalance, cancellationToken);
                 await account.SetInterestRateAsync(DefaultInterestRate, cancellationToken);
             }
@@ -58,10 +59,7 @@ namespace Actors
         public async Task<bool> DeleteAccountAsync(string accountId, GrainCancellationToken cancellationToken)
         {
             var account = GrainFactory.GetGrain<IAccount>(accountId);
-            await account.DeleteAsync(cancellationToken);
-
-            // TODO - Have a mechanism for checking whether the account exists
-            return true;
+            return await account.DeleteAsync(cancellationToken);
         }
 
         public async Task<double> GetAccountBalanceAsync(string accountId, GrainCancellationToken cancellationToken)
@@ -76,11 +74,6 @@ namespace Actors
             var fromAccount = GrainFactory.GetGrain<IAccount>(fromAccountId);
             var toAccount = GrainFactory.GetGrain<IAccount>(toAccountId);
 
-            // TODO - Have a way of distringuishing between accounts with zero balance and those that don't exist
-            // (since the actors are automatically created). Should probably have some ID or boolean that is set
-            // on CreateAccountAsync calls to indicate that the account *actually* exists. Otherwise, users could
-            // accidentally transfer money to non-existent accounts. With this check in place, they could still
-            // transfer to the wrong account but not a non-existent one.
             try
             {
                 await fromAccount.WithdrawAsync(amount, cancellationToken);
@@ -99,9 +92,6 @@ namespace Actors
             }
             catch
             {
-                // This shouldn't actually fail. But for example purposes, if it did (maybe the
-                // toAccount was deleted mid-transfer), we would roll back the withdrawal
-                // from the fromAccount.
                 await fromAccount.DepositAsync(amount, cancellationToken);
 
                 _logger.LogWarning("Transfer failed depositing funds; rolling back. From: {FromAccountId}, To: {ToAccountId}, Amount: {Amount}", fromAccountId, toAccountId, amount);
@@ -112,6 +102,12 @@ namespace Actors
             _logger.LogInformation("Transfer successful. From: {FromAccountId}, To: {ToAccountId}, Amount: {Amount}", fromAccountId, toAccountId, amount);
 
             return true;
+        }
+
+        public async Task<bool> CheckAccountExists(string accountId, GrainCancellationToken cancellationToken)
+        {
+            var account = GrainFactory.GetGrain<IAccount>(accountId);
+            return await account.IsActive(cancellationToken);
         }
     }
 }

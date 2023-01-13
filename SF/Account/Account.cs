@@ -77,9 +77,25 @@ namespace Account
             await StateManager.SetStateAsync<AccountState>(AccountStateName, state);
         }
 
+        public async Task ActivateAsync(CancellationToken cancellationToken)
+        {
+            var state = await StateManager.GetStateAsync<AccountState>(AccountStateName, cancellationToken);
+            state.Active = true;
+            await StateManager.SetStateAsync(AccountStateName, state, cancellationToken);
+        }
+
+        public async Task<bool> IsActive(CancellationToken cancellationToken) =>
+            (await StateManager.GetStateAsync<AccountState>(AccountStateName, cancellationToken)).Active;
+
         public async Task<double> GetBalanceAsync(CancellationToken cancellationToken)
         {
             var state = await StateManager.GetStateAsync<AccountState>(AccountStateName, cancellationToken);
+
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
+
             return state.Balance;
         }
 
@@ -91,6 +107,11 @@ namespace Account
             }
 
             var state = await StateManager.GetStateAsync<AccountState>(AccountStateName, cancellationToken);
+
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
 
             if (amount > state.Balance)
             {
@@ -113,6 +134,11 @@ namespace Account
 
             var state = await StateManager.GetStateAsync<AccountState>(AccountStateName, cancellationToken);
 
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
+
             state.Balance += amount;
 
             await StateManager.SetStateAsync(AccountStateName, state, cancellationToken);
@@ -123,6 +149,12 @@ namespace Account
         public async Task<double> GetInterestRateAsync(CancellationToken cancellationToken)
         {
             var state = await StateManager.GetStateAsync<AccountState>(AccountStateName, cancellationToken);
+
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
+
             return state.InterestRate;
         }
 
@@ -134,6 +166,12 @@ namespace Account
             }
 
             var state = await StateManager.GetStateAsync<AccountState>(AccountStateName, cancellationToken);
+
+            if (!state.Active)
+            {
+                throw new InvalidOperationException($"Account is inactive or does not exist");
+            }
+
             state.InterestRate = rate;
             await StateManager.SetStateAsync(AccountStateName, state, cancellationToken);
         }
